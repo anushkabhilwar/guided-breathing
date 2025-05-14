@@ -12,8 +12,10 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       min-height: 100vh;
       text-align: center;
+      overflow: hidden;
     }
 
     h1 {
@@ -28,11 +30,11 @@
     }
 
     .circle-container {
-      margin: 40px 0;
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
+      perspective: 1000px;
     }
 
     .circle {
@@ -46,31 +48,30 @@
       font-weight: bold;
       color: white;
       background-color: orange;
-      transform: scale(1);
-      transition: transform 1.2s ease-in-out;
+      box-shadow: 0 0 20px rgba(255, 140, 0, 0.7);
+      transition: transform 1.2s ease-in-out, box-shadow 1.2s ease-in-out;
       text-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+      transform-style: preserve-3d;
     }
 
     .deep {
       background-color: #213E60;
+      box-shadow: 0 0 20px rgba(33, 62, 96, 0.8);
     }
 
-    .pulse-orange {
-      animation: pulseOrange 2s infinite ease-in-out;
+    .pulse {
+      animation: pulseAnimation 6s infinite ease-in-out;
     }
 
-    .pulse-blue {
-      animation: pulseBlue 2.5s infinite ease-in-out;
-    }
-
-    @keyframes pulseOrange {
-      0%, 100% { box-shadow: 0 0 20px rgba(255, 140, 0, 0.6); }
-      50%     { box-shadow: 0 0 50px rgba(255, 140, 0, 1); }
-    }
-
-    @keyframes pulseBlue {
-      0%, 100% { box-shadow: 0 0 20px rgba(33, 62, 96, 0.6); }
-      50%     { box-shadow: 0 0 50px rgba(33, 62, 96, 1); }
+    @keyframes pulseAnimation {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(255, 140, 0, 0.7);
+      }
+      50% {
+        transform: scale(1.2);
+        box-shadow: 0 0 40px rgba(255, 140, 0, 1);
+      }
     }
 
     .info-box {
@@ -109,7 +110,7 @@
   <h1>Guided Breathing</h1>
   <div id="mode-label">Current Mode: Normal Breathing</div>
 
-  <div class="circle-container" onclick="toggleMode()">
+  <div class="circle-container" onclick="togglePlayPause()" ondblclick="toggleMode()">
     <div class="circle" id="breathingCircle">
       <span id="phase-label">Inhale</span>
     </div>
@@ -130,6 +131,7 @@
 
   <script>
     let isDeep = false;
+    let isPlaying = true;
     const circle = document.getElementById('breathingCircle');
     const modeLabel = document.getElementById('mode-label');
     const phaseLabel = document.getElementById('phase-label');
@@ -160,45 +162,11 @@
     function setPhase(phase) {
       phaseLabel.textContent = phase;
 
-      circle.classList.remove('pulse-orange', 'pulse-blue');
-
       if (phase === 'Inhale') {
-        circle.style.transform = 'scale(1.5)';
-        circle.classList.add(isDeep ? 'pulse-blue' : 'pulse-orange');
-      } else if (phase === 'Hold') {
-        circle.style.transform = 'scale(1.5)';
+        circle.classList.add('pulse');
+        circle.style.transform = 'scale(1.2)';
         circle.style.boxShadow = isDeep
-          ? '0 0 20px rgba(33, 62, 96, 0.6)'
-          : '0 0 20px rgba(255, 140, 0, 0.6)';
-      } else if (phase === 'Exhale') {
-        circle.style.transform = 'scale(1)';
-        circle.classList.add(isDeep ? 'pulse-blue' : 'pulse-orange');
-      }
-    }
-
-    function startBreathingCycle() {
-      updateTimings();
-
-      function inhale() {
-        setPhase('Inhale');
-        setTimeout(hold, timings.inhale);
-      }
-
-      function hold() {
-        setPhase('Hold');
-        setTimeout(exhale, timings.hold);
-      }
-
-      function exhale() {
-        setPhase('Exhale');
-        setTimeout(inhale, timings.exhale);
-      }
-
-      inhale();
-    }
-
-    startBreathingCycle();
-  </script>
-
-</body>
-</html>
+          ? '0 0 40px rgba(33, 62, 96, 1)'
+          : '0 0 40px rgba(255, 140, 0,
+::contentReference[oaicite:19]{index=19}
+ 
