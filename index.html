@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Guided Breathing</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    :root {
+      --bg-color: #F4F2EE;
+      --accent-color: #E68C3A;
+      --text-color: #213E60;
+      --sphere-glow: #E68C3A;
+      --normal-breathing-color: #F1E0A1;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+      transition: background-color 0.5s, color 0.5s;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin: 0.5em 0 0.2em 0;
+      text-align: center;
+    }
+
+    .instructions {
+      font-size: 1.2rem;
+      margin-bottom: 2em;
+      text-align: center;
+      padding: 0 1em;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 15px 5px var(--sphere-glow), inset 0 0 20px 10px rgba(255, 255, 255, 0.2);
+        opacity: 0.9;
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 40px 20px var(--sphere-glow), inset 0 0 30px 15px rgba(255, 255, 255, 0.4);
+        opacity: 1;
+        transform: scale(1.03);
+      }
+    }
+
+    #breathSphere {
+      width: 40vw;
+      height: 40vw;
+      max-width: 300px;
+      max-height: 300px;
+      min-width: 150px;
+      min-height: 150px;
+      border-radius: 50%;
+      background-color: var(--accent-color);
+      animation: pulseGlow 10s infinite ease-in-out;
+      transition: width 4s ease-in-out, height 4s ease-in-out, background-color 0.5s;
+    }
+
+    .callout-box {
+      background: rgba(255, 255, 255, 0.85);
+      border: 2px solid var(--accent-color);
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      color: var(--text-color);
+      font-size: 0.85rem;
+      max-width: 90vw;
+      margin: 10px auto;
+    }
+
+    .callout-box h3 {
+      font-size: 1rem;
+      margin-top: 0;
+    }
+
+    .callout-box ul {
+      padding-left: 20px;
+      margin: 0;
+    }
+
+    #breathingModeToggle {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent-color);
+      color: var(--bg-color);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    #breathingModeToggle:hover {
+      opacity: 0.85;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 15px;
+      font-size: 0.85rem;
+      color: #000;
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      width: 100%;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .instructions {
+        font-size: 1rem;
+      }
+
+      .callout-box {
+        font-size: 0.75rem;
+      }
+
+      #breathingModeToggle {
+        bottom: 90px;
+        padding: 8px 15px;
+      }
+
+      footer {
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Guided Breathing</h1>
+  <p class="instructions" id="instructionText">Get ready to breathe...</p>
+  <div id="breathSphere"></div>
+
+  <div class="callout-box">
+    <h3>How to Breathe</h3>
+    <ul>
+      <li><strong>Inhale:</strong> In through your nose slowly.</li>
+      <li><strong>Hold:</strong> Brief pause, don’t strain.</li>
+      <li><strong>Exhale:</strong> Out through your mouth steadily.</li>
+    </ul>
+  </div>
+
+  <div class="callout-box">
+    <h3>Physiology</h3>
+    <ul>
+      <li><strong>Normal Breathing:</strong> Shallow chest-based.</li>
+      <li><strong>Deep Breathing:</strong> Engages diaphragm fully.</li>
+    </ul>
+  </div>
+
+  <button id="breathingModeToggle">Deep Breathing</button>
+  <footer>Inhale - Exhale with the blob</footer>
+
+  <script>
+    const breathSphere = document.getElementById('breathSphere');
+    const instructionText = document.getElementById('instructionText');
+    const breathingModeToggle = document.getElementById('breathingModeToggle');
+
+    let deepMode = false;
+
+    const times = {
+      normal: { inhale: 4000, hold: 700, exhale: 6000 },
+      deep: { inhale: 6000, hold: 1500, exhale: 8000 }
+    };
+
+    function updateVisualMode() {
+      breathSphere.style.backgroundColor = deepMode ? 'var(--accent-color)' : 'var(--normal-breathing-color)';
+      breathingModeToggle.textContent = deepMode ? 'Normal Breathing' : 'Deep Breathing';
+    }
+
+    function setInstruction(text) {
+      instructionText.textContent = text;
+    }
+
+    async function breatheCycle() {
+      const mode = deepMode ? times.deep : times.normal;
+
+      setInstruction(deepMode ? 'Deep Inhale' : 'Inhale');
+      breathSphere.style.width = '70vw';
+      breathSphere.style.height = '70vw';
+      await new Promise(r => setTimeout(r, mode.inhale));
+
+      setInstruction('Hold');
+      await new Promise(r => setTimeout(r, mode.hold));
+
+      setInstruction(deepMode ? 'Deep Exhale' : 'Exhale');
+      breathSphere.style.width = '40vw';
+      breathSphere.style.height = '40vw';
+      await new Promise(r => setTimeout(r, mode.exhale));
+
+      setInstruction('Hold');
+      await new Promise(r => setTimeout(r, mode.hold));
+
+      breatheCycle(); // loop
+    }
+
+    breathingModeToggle.addEventListener('click', () => {
+      deepMode = !deepMode;
+      updateVisualMode();
+    });
+
+    updateVisualMode();
+    setTimeout(breatheCycle, 1000);
+  </script>
+</body>
+</html>
