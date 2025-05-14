@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guided Breathing</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f5dc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+      color: #2a4d69;
+    }
+
+    #mode-label {
+      font-size: 20px;
+      color: #2a4d69;
+      margin-bottom: 10px;
+    }
+
+    .circle-container {
+      margin: 40px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .circle {
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 32px;
+      font-weight: bold;
+      color: white;
+      background-color: orange;
+      transform: scale(1);
+      transition: transform 1.2s ease-in-out;
+      text-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .deep {
+      background-color: #213E60;
+    }
+
+    .pulse-orange {
+      animation: pulseOrange 2s infinite ease-in-out;
+    }
+
+    .pulse-blue {
+      animation: pulseBlue 2.5s infinite ease-in-out;
+    }
+
+    @keyframes pulseOrange {
+      0%, 100% { box-shadow: 0 0 20px rgba(255, 140, 0, 0.6); }
+      50%     { box-shadow: 0 0 50px rgba(255, 140, 0, 1); }
+    }
+
+    @keyframes pulseBlue {
+      0%, 100% { box-shadow: 0 0 20px rgba(33, 62, 96, 0.6); }
+      50%     { box-shadow: 0 0 50px rgba(33, 62, 96, 1); }
+    }
+
+    .info-box {
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 15px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+
+    .info-box h3 {
+      color: #2a4d69;
+    }
+
+    .info-box p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    @media (max-width: 768px) {
+      .circle {
+        width: 180px;
+        height: 180px;
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Guided Breathing</h1>
+  <div id="mode-label">Current Mode: Normal Breathing</div>
+
+  <div class="circle-container" onclick="toggleMode()">
+    <div class="circle" id="breathingCircle">
+      <span id="phase-label">Inhale</span>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <h3>How to Breathe</h3>
+    <p><strong>Inhale:</strong> Gently breathe in through your nose, filling your lungs comfortably.</p>
+    <p><strong>Hold:</strong> After inhaling or exhaling, pause for a brief moment, holding the air in your lungs without strain.</p>
+    <p><strong>Exhale:</strong> Slowly exhale through your mouth, releasing the air steadily.</p>
+  </div>
+
+  <div class="info-box">
+    <h3>Physiology</h3>
+    <p><strong>Normal Breathing:</strong> Shallow chest breathing. Less lung capacity involved.</p>
+    <p><strong>Deep Breathing:</strong> Full diaphragm engagement. Expands the lungs completely, improving oxygen intake and relaxation.</p>
+  </div>
+
+  <script>
+    let isDeep = false;
+    const circle = document.getElementById('breathingCircle');
+    const modeLabel = document.getElementById('mode-label');
+    const phaseLabel = document.getElementById('phase-label');
+
+    let timings = {
+      inhale: 2000,
+      hold: 1500,
+      exhale: 3000
+    };
+
+    function updateTimings() {
+      if (isDeep) {
+        timings = { inhale: 4000, hold: 7000, exhale: 8000 };
+      } else {
+        timings = { inhale: 2000, hold: 1500, exhale: 3000 };
+      }
+    }
+
+    function toggleMode() {
+      isDeep = !isDeep;
+      circle.classList.toggle('deep', isDeep);
+      modeLabel.textContent = isDeep
+        ? "Current Mode: Deep Breathing"
+        : "Current Mode: Normal Breathing";
+      updateTimings();
+    }
+
+    function setPhase(phase) {
+      phaseLabel.textContent = phase;
+
+      circle.classList.remove('pulse-orange', 'pulse-blue');
+
+      if (phase === 'Inhale') {
+        circle.style.transform = 'scale(1.5)';
+        circle.classList.add(isDeep ? 'pulse-blue' : 'pulse-orange');
+      } else if (phase === 'Hold') {
+        circle.style.transform = 'scale(1.5)';
+        circle.style.boxShadow = isDeep
+          ? '0 0 20px rgba(33, 62, 96, 0.6)'
+          : '0 0 20px rgba(255, 140, 0, 0.6)';
+      } else if (phase === 'Exhale') {
+        circle.style.transform = 'scale(1)';
+        circle.classList.add(isDeep ? 'pulse-blue' : 'pulse-orange');
+      }
+    }
+
+    function startBreathingCycle() {
+      updateTimings();
+
+      function inhale() {
+        setPhase('Inhale');
+        setTimeout(hold, timings.inhale);
+      }
+
+      function hold() {
+        setPhase('Hold');
+        setTimeout(exhale, timings.hold);
+      }
+
+      function exhale() {
+        setPhase('Exhale');
+        setTimeout(inhale, timings.exhale);
+      }
+
+      inhale();
+    }
+
+    startBreathingCycle();
+  </script>
+
+</body>
+</html>
