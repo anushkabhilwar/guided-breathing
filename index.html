@@ -12,29 +12,44 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      padding: 20px;
       min-height: 100vh;
       text-align: center;
-      overflow: hidden;
     }
 
     h1 {
-      margin-top: 20px;
       color: #2a4d69;
+      margin: 20px 0 10px;
     }
 
     #mode-label {
       font-size: 20px;
       color: #2a4d69;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .button-row {
+      margin-bottom: 20px;
+    }
+
+    button {
+      background-color: #2a4d69;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
     .circle-container {
+      flex: 1;
       display: flex;
       justify-content: center;
       align-items: center;
-      cursor: pointer;
-      perspective: 1000px;
+      min-height: 60vh;
+      z-index: 1;
     }
 
     .circle {
@@ -48,30 +63,22 @@
       font-weight: bold;
       color: white;
       background-color: orange;
-      box-shadow: 0 0 20px rgba(255, 140, 0, 0.7);
-      transition: transform 1.2s ease-in-out, box-shadow 1.2s ease-in-out;
+      box-shadow: 0 0 40px rgba(255, 165, 0, 0.9);
       text-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
       transform-style: preserve-3d;
+      transition: transform 1s ease-in-out, background-color 1s ease, box-shadow 1s ease;
     }
 
-    .deep {
-      background-color: #213E60;
-      box-shadow: 0 0 20px rgba(33, 62, 96, 0.8);
-    }
-
-    .pulse {
-      animation: pulseAnimation 6s infinite ease-in-out;
-    }
-
-    @keyframes pulseAnimation {
-      0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 0 20px rgba(255, 140, 0, 0.7);
-      }
-      50% {
-        transform: scale(1.2);
-        box-shadow: 0 0 40px rgba(255, 140, 0, 1);
-      }
+    .info-section {
+      position: absolute;
+      left: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 300px;
+      text-align: left;
     }
 
     .info-box {
@@ -79,11 +86,8 @@
       border: 1px solid #ccc;
       border-radius: 10px;
       padding: 20px;
-      margin: 15px;
-      width: 90%;
-      max-width: 500px;
+      width: 100%;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      text-align: left;
     }
 
     .info-box h3 {
@@ -102,6 +106,13 @@
         height: 200px;
         font-size: 24px;
       }
+
+      .info-section {
+        position: static;
+        transform: none;
+        align-items: center;
+        margin-top: 30px;
+      }
     }
   </style>
 </head>
@@ -110,31 +121,40 @@
   <h1>Guided Breathing</h1>
   <div id="mode-label">Current Mode: Normal Breathing</div>
 
-  <div class="circle-container" onclick="togglePlayPause()" ondblclick="toggleMode()">
+  <div class="button-row">
+    <button onclick="togglePlayPause()" id="playPauseBtn">Start</button>
+    <button onclick="toggleMode()">Toggle Mode</button>
+  </div>
+
+  <div class="circle-container">
     <div class="circle" id="breathingCircle">
-      <span id="phase-label">Inhale</span>
+      <span id="phase-label">Ready</span>
     </div>
   </div>
 
-  <div class="info-box">
-    <h3>How to Breathe</h3>
-    <p><strong>Inhale:</strong> Gently breathe in through your nose, filling your lungs comfortably.</p>
-    <p><strong>Hold:</strong> After inhaling or exhaling, pause for a brief moment, holding the air in your lungs without strain.</p>
-    <p><strong>Exhale:</strong> Slowly exhale through your mouth, releasing the air steadily.</p>
-  </div>
+  <div class="info-section">
+    <div class="info-box">
+      <h3>How to Breathe</h3>
+      <p><strong>Inhale:</strong> Gently breathe in through your nose, filling your lungs comfortably.</p>
+      <p><strong>Hold:</strong> After inhaling or exhaling, pause for a brief moment, holding the air in your lungs without strain.</p>
+      <p><strong>Exhale:</strong> Slowly exhale through your mouth, releasing the air steadily.</p>
+    </div>
 
-  <div class="info-box">
-    <h3>Physiology</h3>
-    <p><strong>Normal Breathing:</strong> Shallow chest breathing. Less lung capacity involved.</p>
-    <p><strong>Deep Breathing:</strong> Full diaphragm engagement. Expands the lungs completely, improving oxygen intake and relaxation.</p>
+    <div class="info-box">
+      <h3>Physiology</h3>
+      <p><strong>Normal Breathing:</strong> Shallow chest breathing. Less lung capacity involved.</p>
+      <p><strong>Deep Breathing:</strong> Full diaphragm engagement. Expands the lungs completely, improving oxygen intake and relaxation.</p>
+    </div>
   </div>
 
   <script>
     let isDeep = false;
-    let isPlaying = true;
+    let isPlaying = false;
+    let breathingCycle;
     const circle = document.getElementById('breathingCircle');
     const modeLabel = document.getElementById('mode-label');
     const phaseLabel = document.getElementById('phase-label');
+    const playPauseBtn = document.getElementById('playPauseBtn');
 
     let timings = {
       inhale: 2000,
@@ -152,7 +172,6 @@
 
     function toggleMode() {
       isDeep = !isDeep;
-      circle.classList.toggle('deep', isDeep);
       modeLabel.textContent = isDeep
         ? "Current Mode: Deep Breathing"
         : "Current Mode: Normal Breathing";
@@ -160,26 +179,23 @@
     }
 
     function setPhase(phase) {
+      const scaleTo = isDeep ? 1.4 : 1.2;
       phaseLabel.textContent = phase;
 
       if (phase === 'Inhale') {
-        circle.classList.add('pulse');
-        circle.style.transform = 'scale(1.2)';
-        circle.style.boxShadow = isDeep
-          ? '0 0 40px rgba(33, 62, 96, 1)'
-          : '0 0 40px rgba(255, 140, 0, 1)';
+        circle.style.transitionDuration = `${timings.inhale}ms`;
+        circle.style.transform = `scale(${scaleTo})`;
+        circle.style.backgroundColor = '#3cb371'; // green
+        circle.style.boxShadow = `0 0 40px rgba(60, 179, 113, 0.9)`;
       } else if (phase === 'Hold') {
-        circle.classList.remove('pulse');
-        circle.style.transform = 'scale(1)';
-        circle.style.boxShadow = isDeep
-          ? '0 0 20px rgba(33, 62, 96, 0.8)'
-          : '0 0 20px rgba(255, 140, 0, 0.7)';
+        circle.style.transitionDuration = '0ms';
+        circle.style.backgroundColor = '#4682b4'; // blue
+        circle.style.boxShadow = `0 0 40px rgba(70, 130, 180, 0.9)`;
       } else if (phase === 'Exhale') {
-        circle.classList.add('pulse');
-        circle.style.transform = 'scale(1)';
-        circle.style.boxShadow = isDeep
-          ? '0 0 40px rgba(33, 62, 96, 1)'
-          : '0 0 40px rgba(255, 140, 0, 1)';
+        circle.style.transitionDuration = `${timings.exhale}ms`;
+        circle.style.transform = `scale(1)`;
+        circle.style.backgroundColor = '#ba55d3'; // purple
+        circle.style.boxShadow = `0 0 30px rgba(186, 85, 211, 0.9)`;
       }
     }
 
@@ -187,18 +203,21 @@
       updateTimings();
 
       function inhale() {
+        if (!isPlaying) return;
         setPhase('Inhale');
-        setTimeout(hold, timings.inhale);
+        breathingCycle = setTimeout(hold, timings.inhale);
       }
 
       function hold() {
+        if (!isPlaying) return;
         setPhase('Hold');
-        setTimeout(exhale, timings.hold);
+        breathingCycle = setTimeout(exhale, timings.hold);
       }
 
       function exhale() {
+        if (!isPlaying) return;
         setPhase('Exhale');
-        setTimeout(inhale, timings.exhale);
+        breathingCycle = setTimeout(inhale, timings.exhale);
       }
 
       inhale();
@@ -206,12 +225,19 @@
 
     function togglePlayPause() {
       isPlaying = !isPlaying;
+      playPauseBtn.textContent = isPlaying ? "Stop" : "Start";
+
       if (isPlaying) {
         startBreathingCycle();
+      } else {
+        clearTimeout(breathingCycle);
+        phaseLabel.textContent = "Paused";
+        circle.style.transitionDuration = '500ms';
+        circle.style.transform = 'scale(1)';
+        circle.style.backgroundColor = 'orange';
+        circle.style.boxShadow = '0 0 20px rgba(255, 140, 0, 0.7)';
       }
     }
-
-    startBreathingCycle();
   </script>
 
 </body>
