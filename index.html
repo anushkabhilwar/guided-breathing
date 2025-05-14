@@ -38,8 +38,8 @@
     }
 
     .circle {
-      width: 250px;
-      height: 250px;
+      width: 300px;
+      height: 300px;
       border-radius: 50%;
       display: flex;
       justify-content: center;
@@ -98,8 +98,8 @@
 
     @media (max-width: 768px) {
       .circle {
-        width: 180px;
-        height: 180px;
+        width: 200px;
+        height: 200px;
         font-size: 24px;
       }
     }
@@ -167,6 +167,52 @@
         circle.style.transform = 'scale(1.2)';
         circle.style.boxShadow = isDeep
           ? '0 0 40px rgba(33, 62, 96, 1)'
-          : '0 0 40px rgba(255, 140, 0,
-::contentReference[oaicite:19]{index=19}
- 
+          : '0 0 40px rgba(255, 140, 0, 1)';
+      } else if (phase === 'Hold') {
+        circle.classList.remove('pulse');
+        circle.style.transform = 'scale(1)';
+        circle.style.boxShadow = isDeep
+          ? '0 0 20px rgba(33, 62, 96, 0.8)'
+          : '0 0 20px rgba(255, 140, 0, 0.7)';
+      } else if (phase === 'Exhale') {
+        circle.classList.add('pulse');
+        circle.style.transform = 'scale(1)';
+        circle.style.boxShadow = isDeep
+          ? '0 0 40px rgba(33, 62, 96, 1)'
+          : '0 0 40px rgba(255, 140, 0, 1)';
+      }
+    }
+
+    function startBreathingCycle() {
+      updateTimings();
+
+      function inhale() {
+        setPhase('Inhale');
+        setTimeout(hold, timings.inhale);
+      }
+
+      function hold() {
+        setPhase('Hold');
+        setTimeout(exhale, timings.hold);
+      }
+
+      function exhale() {
+        setPhase('Exhale');
+        setTimeout(inhale, timings.exhale);
+      }
+
+      inhale();
+    }
+
+    function togglePlayPause() {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        startBreathingCycle();
+      }
+    }
+
+    startBreathingCycle();
+  </script>
+
+</body>
+</html>
